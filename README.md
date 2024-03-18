@@ -63,7 +63,7 @@ git clone https://github.com/nvim-lua/kickstart.nvim.git "${XDG_CONFIG_HOME:-$HO
 If you're using `cmd.exe`:
 
 ```
-git clone https://github.com/nvim-lua/kickstart.nvim.git %userprofile%\AppData\Local\nvim\
+git clone https://github.com/Catacomba/kickstart.nvim.git %userprofile%\AppData\Local\nvim\
 ```
 
 If you're using `powershell.exe`
