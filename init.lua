@@ -157,6 +157,9 @@ vim.opt.scrolloff = 10
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Personal keymaps
+vim.keymap.set('n', '<C-a>', 'ggVG')
+
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -422,8 +425,12 @@ require('lazy').setup({
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
 
+      vim.keymap.set('n', '<leader>nn', function()
+        builtin.find_files { cwd = 'C:/_notes' }
+      end, { desc = '[N]avigate [N]otes' })
+
       vim.keymap.set('n', '<leader>fb', function()
-        require 'telescope'.extensions.file_browser.file_browser()
+        require('telescope').extensions.file_browser.file_browser()
       end, { desc = '[F]ile [B]rowser' })
     end,
   },
