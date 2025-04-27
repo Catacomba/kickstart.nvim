@@ -213,7 +213,6 @@ require('lazy').setup({
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
         ['<leader>l'] = { name = '[L]azyGit & Lua sourcing', _ = 'which_key_ignore' },
         ['<leader>f'] = { name = '[F]ile utilities', _ = 'which_key_ignore' },
-        ['<leader>f'] = { name = '[F]ile', _ = 'which_key_ignore' },
       }
     end,
   },
