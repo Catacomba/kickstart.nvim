@@ -76,7 +76,8 @@ vim.opt.scrolloff = 10
 
 -- Personal keymaps
 vim.keymap.set('n', '<C-a>', 'ggVG')
-
+vim.keymap.set('n', 'J', '20j')
+vim.keymap.set('n', 'K', '20k')
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -212,6 +213,7 @@ require('lazy').setup({
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
         ['<leader>l'] = { name = '[L]azyGit & Lua sourcing', _ = 'which_key_ignore' },
         ['<leader>f'] = { name = '[F]ile utilities', _ = 'which_key_ignore' },
+        ['<leader>f'] = { name = '[F]ile', _ = 'which_key_ignore' },
       }
     end,
   },
@@ -357,7 +359,14 @@ require('lazy').setup({
         end
       end, { desc = '[N]avigate [N]otes' })
 
-      vim.keymap.set('n', '<leader>fb', function()
+      vim.keymap.set('n', '<leader>fbc', function()
+        require('telescope').extensions.file_browser.file_browser {
+          path = '%:p:h',
+          select_buffer = true,
+        }
+      end, { desc = '[C]urrent' })
+
+      vim.keymap.set('n', '<leader>fbr', function()
         require('telescope').extensions.file_browser.file_browser()
       end, { desc = 'File [B]rowser' })
     end,
@@ -425,19 +434,20 @@ require('lazy').setup({
           -- Jump to the definition of the word under your cursor.
           --  This is where a variable was first declared, or where a function is defined, etc.
           --  To jump back, press <C-t>.
-          map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+          map('gd', require('omnisharp_extended').lsp_definition, '[G]oto [D]efinition')
+          map('<leader>gd', require('omnisharp_extended').lsp_definitions, '[G]oto [D]efinition')
 
           -- Find references for the word under your cursor.
-          map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+          map('gr', require('omnisharp_extended').lsp_references, '[G]oto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
-          map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+          map('gI', require('omnisharp_extended').lsp_implementation, '[G]oto [I]mplementation')
 
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
-          map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          map('<leader>D', require('omnisharp_extended').lsp_type_definition, 'Type [D]efinition')
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
@@ -457,7 +467,7 @@ require('lazy').setup({
 
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap
-          map('K', vim.lsp.buf.hover, 'Hover Documentation')
+          map('H', vim.lsp.buf.hover, '[H]over Documentation')
 
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header
@@ -527,7 +537,7 @@ require('lazy').setup({
             },
           },
         },
-        omnisharp = {},
+        --   omnisharp = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -564,15 +574,21 @@ require('lazy').setup({
   { -- Autoformat
     'stevearc/conform.nvim',
     opts = {
-      notify_on_error = false,
+      -- formatters = {
+      --   csharpier = {
+      --     args = { '--write-stdout --config-path  ' },
+      --   },
+      -- },
+      notify_on_error = true,
       format_on_save = function(bufnr)
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = { cs = true, c = true, cpp = true }
         return {
-          timeout_ms = 500,
-          lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
+          timeout_ms = 2000,
+          -- lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
+          lsp_fallback = true,
         }
       end,
       formatters_by_ft = {
@@ -623,6 +639,7 @@ require('lazy').setup({
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
     },
+
     config = function()
       -- See `:help cmp`
       local cmp = require 'cmp'
