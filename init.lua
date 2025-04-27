@@ -101,6 +101,11 @@ vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
 vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
+-- Source lua files
+vim.keymap.set('n', '<leader>ls', '<cmd>source %<CR>', { desc = "[L]ua source file" })
+vim.keymap.set('n', '<leader>ll', ':.lua<CR>', { desc = "[L]ua source line" })
+vim.keymap.set('v', '<leader>le', ':lua<CR>', { desc = "[L]ua source selection" })
+
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
@@ -158,7 +163,7 @@ require('lazy').setup({
   --    require('Comment').setup({})
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',    opts = {} },
 
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following lua:
@@ -193,12 +198,11 @@ require('lazy').setup({
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  { -- Useful plugin to show you pending keybinds.
+  {                     -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     config = function() -- This is the function that runs, AFTER loading
       require('which-key').setup()
-
       -- Document existing key chains
       require('which-key').register {
         ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
@@ -206,6 +210,8 @@ require('lazy').setup({
         ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
         ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+        ['<leader>l'] = { name = '[L]azyGit & Lua sourcing', _ = 'which_key_ignore' },
+        ['<leader>f'] = { name = '[F]ile utilities', _ = 'which_key_ignore' },
       }
     end,
   },
@@ -242,7 +248,7 @@ require('lazy').setup({
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -314,11 +320,11 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
-      vim.keymap.set('n', '<leader>fnp', function()
+      vim.keymap.set('n', '<leader>fp', function()
         builtin.find_files(require('telescope.themes').get_dropdown {
           previewer = false,
         })
-      end, { desc = '[F]ind with [n]o [p]review' })
+      end, { desc = 'Find no [p]review' })
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
         -- You can pass additional configuration to telescope to change theme, layout, etc.
@@ -342,13 +348,18 @@ require('lazy').setup({
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
 
-      vim.keymap.set('n', '<leader>nn', function()
-        builtin.find_files { cwd = 'C:/_notes' }
+      print(vim.uv.os_uname().sysname)
+      vim.keymap.set('n', '<leader>n', function()
+        if (vim.uv.os_uname().sysname == 'Linux') then
+          builtin.find_files { cwd = '~/_notes' }
+        elseif (vim.uv.os_uname().sysname == 'Windows') then
+          builtin.find_files { cwd = 'C:/_notes' }
+        end
       end, { desc = '[N]avigate [N]otes' })
 
       vim.keymap.set('n', '<leader>fb', function()
         require('telescope').extensions.file_browser.file_browser()
-      end, { desc = '[F]ile [B]rowser' })
+      end, { desc = 'File [B]rowser' })
     end,
   },
 
@@ -565,7 +576,7 @@ require('lazy').setup({
         }
       end,
       formatters_by_ft = {
-        lua = { 'stylua' },
+        -- lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -739,7 +750,10 @@ require('lazy').setup({
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
   },
-
+  {
+    'nvim-treesitter/nvim-treesitter-context',
+    build = ':TSUpdate',
+  },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
@@ -761,7 +775,6 @@ require('lazy').setup({
 
       ---@diagnostic disable-next-line: missing-fields
       require('nvim-treesitter.configs').setup(opts)
-
       -- There are additional nvim-treesitter modules that you can use to interact
       -- with nvim-treesitter. You should go explore a few and see what interests you:
       --
