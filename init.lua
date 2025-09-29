@@ -109,9 +109,9 @@ vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Source lua files
-vim.keymap.set('n', '<leader>ls', '<cmd>source %<CR>', { desc = "[L]ua source file" })
-vim.keymap.set('n', '<leader>ll', ':.lua<CR>', { desc = "[L]ua source line" })
-vim.keymap.set('v', '<leader>le', ':lua<CR>', { desc = "[L]ua source selection" })
+vim.keymap.set('n', '<leader>ls', '<cmd>source %<CR>', { desc = '[L]ua source file' })
+vim.keymap.set('n', '<leader>ll', ':.lua<CR>', { desc = '[L]ua source line' })
+vim.keymap.set('v', '<leader>le', ':lua<CR>', { desc = '[L]ua source selection' })
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -193,7 +193,7 @@ require('lazy').setup({
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  {                     -- Useful plugin to show you pending keybinds.
+  { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     opts = {
@@ -283,7 +283,7 @@ require('lazy').setup({
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -353,8 +353,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>s.', builtin.oldfiles,
-        { desc = '[S]earch Recent Files ("." for repeat)' })
+      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
       vim.keymap.set('n', '<leader>fp', function()
         builtin.find_files(require('telescope.themes').get_dropdown {
@@ -386,9 +385,9 @@ require('lazy').setup({
 
       print(vim.uv.os_uname().sysname)
       vim.keymap.set('n', '<leader>n', function()
-        if (vim.uv.os_uname().sysname == 'Linux') then
+        if vim.uv.os_uname().sysname == 'Linux' then
           builtin.find_files { cwd = '~/_notes' }
-        elseif (vim.uv.os_uname().sysname == 'Windows') then
+        elseif vim.uv.os_uname().sysname == 'Windows' then
           builtin.find_files { cwd = 'C:/_notes' }
         end
       end, { desc = '[N]avigate [N]otes' })
@@ -462,8 +461,7 @@ require('lazy').setup({
           -- In this case, we create a function that lets us more easily define mappings specific
           -- for LSP related items. It sets the mode, buffer and description for us each time.
           local map = function(keys, func, desc)
-            vim.keymap.set('n', keys, func,
-              { buffer = event.buf, desc = 'LSP: ' .. desc })
+            vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
           -- Jump to the definition of the word under your cursor.
@@ -486,13 +484,11 @@ require('lazy').setup({
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols,
-            '[D]ocument [S]ymbols')
+          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
 
           -- Fuzzy find all the symbols in your current workspace
           --  Similar to document symbols, except searches over your whole project.
-          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols,
-            '[W]orkspace [S]ymbols')
+          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
           -- Rename the variable under your cursor
           --  Most Language Servers support renaming across files, etc.
@@ -536,8 +532,7 @@ require('lazy').setup({
       --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
       --  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
       local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend('force', capabilities,
-        require('cmp_nvim_lsp').default_capabilities())
+      capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -602,8 +597,7 @@ require('lazy').setup({
             -- This handles overriding only values explicitly passed
             -- by the server configuration above. Useful when disabling
             -- certain features of an LSP (for example, turning off formatting for tsserver)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities,
-              server.capabilities or {})
+            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
             require('lspconfig')[server_name].setup(server)
           end,
         },
@@ -624,7 +618,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { cs = true, c = true, cpp = true }
+        local disable_filetypes = { cs = true, c = true, cpp = true, py = true }
         return {
           timeout_ms = 2000,
           -- lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
@@ -763,8 +757,8 @@ require('lazy').setup({
       vim.cmd.colorscheme 'tokyonight-night'
 
       -- Load colorcolumn here, because othervise the color gets overiden by colorscheme
-      vim.opt.colorcolumn = "80"
-      vim.api.nvim_set_hl(0, "ColorColumn", { ctermbg = 0, bg = "#a6e3a1" })
+      vim.opt.colorcolumn = '80'
+      vim.api.nvim_set_hl(0, 'ColorColumn', { ctermbg = 0, bg = '#a6e3a1' })
       -- You can configure highlights by doing something like
       vim.cmd.hi 'Comment gui=none'
     end,
@@ -832,10 +826,10 @@ require('lazy').setup({
       incremental_selection = {
         enable = true,
         keymaps = {
-          init_selection = "<Leader>gnn", -- set to `false` to disable one of the mappings
-          node_incremental = "<Leader>grn",
-          scope_incremental = "<Leader>grc",
-          node_decremental = "<Leader>grm",
+          init_selection = '<Leader>gnn', -- set to `false` to disable one of the mappings
+          node_incremental = '<Leader>grn',
+          scope_incremental = '<Leader>grc',
+          node_decremental = '<Leader>grm',
         },
       },
     },
