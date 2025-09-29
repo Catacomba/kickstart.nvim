@@ -21,6 +21,8 @@ vim.opt.number = true
 --  Experiment for yourself to see if you like it!
 vim.opt.relativenumber = true
 
+vim.opt.termguicolors = true
+
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
@@ -30,7 +32,11 @@ vim.opt.showmode = false
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
-vim.opt.clipboard = 'unnamedplus'
+vim.schedule(function()
+  vim.o.clipboard = 'unnamedplus'
+end)
+
+vim.opt.virtualedit = 'block'
 
 -- Enable break indent
 vim.opt.breakindent = true
@@ -131,7 +137,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
---    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not vim.loop.fs_stat(lazypath) then
   local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
@@ -149,29 +154,18 @@ vim.opt.rtp:prepend(lazypath)
 --  To update plugins, you can run
 --    :Lazy update
 --
+--
+-- NOTE: requer('lazy') runs the init.lua of lazy, lazy is installed
+-- inside of stdpath('data')/lazy/lazy.nvim
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
-  -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
-
-  -- NOTE: Plugins can also be added by using a table,
-  -- with the first argument being the link and the following
-  -- keys can be used to configure plugin behavior/loading/etc.
-  --
-  -- Use `opts = {}` to force a plugin to be loaded.
-  --
-  --  This is equivalent to:
-  --    require('Comment').setup({})
+  -- Detect tabstop and shiftwidth automatically
+  { 'tpope/vim-sleuth' },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim',    opts = {} },
+  { 'numToStr/Comment.nvim', opts = {} },
 
-  -- Here is a more advanced example where we pass configuration
-  -- options to `gitsigns.nvim`. This is equivalent to the following lua:
-  --    require('gitsigns').setup({ ... })
-  --
-  -- See `:help gitsigns` to understand what the configuration keys do
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
+  {
     'lewis6991/gitsigns.nvim',
     opts = {
       signs = {
@@ -202,21 +196,61 @@ require('lazy').setup({
   {                     -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
-      -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-        ['<leader>l'] = { name = '[L]azyGit & Lua sourcing', _ = 'which_key_ignore' },
-        ['<leader>f'] = { name = '[F]ile utilities', _ = 'which_key_ignore' },
-      }
-    end,
-  },
+    opts = {
+      -- delay between pressing a key and opening which-key (milliseconds)
+      -- this setting is independent of vim.o.timeoutlen
+      delay = 0,
+      icons = {
+        -- set icon mappings to true if you have a Nerd Font
+        mappings = vim.g.have_nerd_font,
+        -- If you are using a Nerd Font: set icons.keys to an empty table which will use the
+        -- default which-key.nvim defined Nerd Font icons, otherwise define a string table
+        keys = vim.g.have_nerd_font and {} or {
+          Up = '<Up> ',
+          Down = '<Down> ',
+          Left = '<Left> ',
+          Right = '<Right> ',
+          C = '<C-…> ',
+          M = '<M-…> ',
+          D = '<D-…> ',
+          S = '<S-…> ',
+          CR = '<CR> ',
+          Esc = '<Esc> ',
+          ScrollWheelDown = '<ScrollWheelDown> ',
+          ScrollWheelUp = '<ScrollWheelUp> ',
+          NL = '<NL> ',
+          BS = '<BS> ',
+          Space = '<Space> ',
+          Tab = '<Tab> ',
+          F1 = '<F1>',
+          F2 = '<F2>',
+          F3 = '<F3>',
+          F4 = '<F4>',
+          F5 = '<F5>',
+          F6 = '<F6>',
+          F7 = '<F7>',
+          F8 = '<F8>',
+          F9 = '<F9>',
+          F10 = '<F10>',
+          F11 = '<F11>',
+          F12 = '<F12>',
+        },
+      },
 
+      -- Document existing key chains
+      spec = {
+        { '<leader>s', group = '[S]earch' },
+        { '<leader>t', group = '[T]oggle' },
+        { '<leader>c', group = '[C]ode' },
+        { '<leader>d', group = '[D]ocument' },
+        { '<leader>r', group = '[R]ename' },
+        { '<leader>w', group = '[W]orkspace' },
+        { '<leader>l', group = '[L]azyGit & Lua sourcing' },
+        { '<leader>f', group = '[F]ile utilities' },
+        { '<leader>g', group = '[G]ile utilities' },
+      },
+    },
+  },
   -- NOTE: Plugins can specify dependencies.
   --
   -- The dependencies are proper plugin specifications as well - anything
@@ -319,7 +353,8 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+      vim.keymap.set('n', '<leader>s.', builtin.oldfiles,
+        { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
       vim.keymap.set('n', '<leader>fp', function()
         builtin.find_files(require('telescope.themes').get_dropdown {
@@ -358,14 +393,14 @@ require('lazy').setup({
         end
       end, { desc = '[N]avigate [N]otes' })
 
-      vim.keymap.set('n', '<leader>fbc', function()
+      vim.keymap.set('n', '<leader>fc', function()
         require('telescope').extensions.file_browser.file_browser {
           path = '%:p:h',
           select_buffer = true,
         }
       end, { desc = '[C]urrent' })
 
-      vim.keymap.set('n', '<leader>fbr', function()
+      vim.keymap.set('n', '<leader>fb', function()
         require('telescope').extensions.file_browser.file_browser()
       end, { desc = 'File [B]rowser' })
     end,
@@ -427,34 +462,37 @@ require('lazy').setup({
           -- In this case, we create a function that lets us more easily define mappings specific
           -- for LSP related items. It sets the mode, buffer and description for us each time.
           local map = function(keys, func, desc)
-            vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
+            vim.keymap.set('n', keys, func,
+              { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
           -- Jump to the definition of the word under your cursor.
           --  This is where a variable was first declared, or where a function is defined, etc.
           --  To jump back, press <C-t>.
-          map('gd', require('omnisharp_extended').lsp_definition, '[G]oto [D]efinition')
-          map('<leader>gd', require('omnisharp_extended').lsp_definitions, '[G]oto [D]efinition')
+          --          map('gd', require('omnisharp_extended').lsp_definition, '[G]oto [D]efinition')
+          --          map('<leader>gd', require('omnisharp_extended').lsp_definitions, '[G]oto [D]efinition')
 
           -- Find references for the word under your cursor.
-          map('gr', require('omnisharp_extended').lsp_references, '[G]oto [R]eferences')
+          map('gr', vim.lsp.buf.references, '[G]oto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
-          map('gI', require('omnisharp_extended').lsp_implementation, '[G]oto [I]mplementation')
+          map('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
 
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
-          map('<leader>D', require('omnisharp_extended').lsp_type_definition, 'Type [D]efinition')
+          map('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+          map('<leader>ds', require('telescope.builtin').lsp_document_symbols,
+            '[D]ocument [S]ymbols')
 
           -- Fuzzy find all the symbols in your current workspace
           --  Similar to document symbols, except searches over your whole project.
-          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols,
+            '[W]orkspace [S]ymbols')
 
           -- Rename the variable under your cursor
           --  Most Language Servers support renaming across files, etc.
@@ -471,6 +509,7 @@ require('lazy').setup({
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+          map('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
 
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
@@ -497,7 +536,8 @@ require('lazy').setup({
       --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
       --  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
       local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+      capabilities = vim.tbl_deep_extend('force', capabilities,
+        require('cmp_nvim_lsp').default_capabilities())
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -562,7 +602,8 @@ require('lazy').setup({
             -- This handles overriding only values explicitly passed
             -- by the server configuration above. Useful when disabling
             -- certain features of an LSP (for example, turning off formatting for tsserver)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities,
+              server.capabilities or {})
             require('lspconfig')[server_name].setup(server)
           end,
         },
@@ -721,6 +762,9 @@ require('lazy').setup({
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
 
+      -- Load colorcolumn here, because othervise the color gets overiden by colorscheme
+      vim.opt.colorcolumn = "80"
+      vim.api.nvim_set_hl(0, "ColorColumn", { ctermbg = 0, bg = "#a6e3a1" })
       -- You can configure highlights by doing something like
       vim.cmd.hi 'Comment gui=none'
     end,
@@ -774,7 +818,7 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = { 'bash', 'c', 'html', 'lua', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'html', 'lua', 'markdown', 'vim', 'vimdoc', 'python' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -782,9 +826,18 @@ require('lazy').setup({
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
+        additional_vim_regex_highlighting = { 'ruby', 'python' },
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = true, disable = { 'ruby', 'python' } },
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = "<Leader>gnn", -- set to `false` to disable one of the mappings
+          node_incremental = "<Leader>grn",
+          scope_incremental = "<Leader>grc",
+          node_decremental = "<Leader>grm",
+        },
+      },
     },
     config = function(_, opts)
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
