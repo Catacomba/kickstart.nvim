@@ -84,9 +84,6 @@ vim.opt.scrolloff = 10
 vim.keymap.set('n', '<C-a>', 'ggVG')
 vim.keymap.set('n', 'J', '20j')
 vim.keymap.set('n', 'K', '20k')
-vim.keymap.set('n', 'jok', function()
-  print 'hey kevin'
-end)
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
@@ -159,10 +156,108 @@ vim.opt.rtp:prepend(lazypath)
 --    :Lazy update
 --
 --
--- NOTE: requer('lazy') runs the init.lua of lazy, lazy is installed
+-- NOTE: require('lazy') runs the init.lua of lazy, lazy is installed
 -- inside of stdpath('data')/lazy/lazy.nvim
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
+  {
+    'stevearc/oil.nvim',
+    ---@module 'oil'
+    ---@type oil.SetupOpts
+    opts = {
+      keymaps = {
+        ['<BS>'] = { 'actions.parent', mode = 'n' },
+      },
+    },
+    -- Optional dependencies
+    -- dependencies = { { 'nvim-mini/mini.icons', opts = {} } },
+    dependencies = { 'nvim-tree/nvim-web-devicons' }, -- use if you prefer nvim-web-devicons
+    -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
+    lazy = false,
+    keys = {
+      { '<leader>fo', '<cmd>Oil<cr>', desc = '[O]il file browser' },
+    },
+  },
+  {
+    'supermaven-inc/supermaven-nvim',
+    config = function()
+      require('supermaven-nvim').setup {}
+    end,
+  },
+  {
+    'mfussenegger/nvim-dap-python',
+    -- opts = {},
+  },
+  {
+    'mfussenegger/nvim-dap',
+    enabled = true,
+    config = function()
+      local dap = require 'dap'
+      dap.adapters.python = function(cb, config)
+        if config.request == 'attach' then
+          ---@diagnostic disable-next-line: undefined-field
+          local port = (config.connect or config).port
+          ---@diagnostic disable-next-line: undefined-field
+          local host = (config.connect or config).host or '127.0.0.1'
+          cb {
+            type = 'server',
+            port = assert(port, '`connect.port` is required for a python `attach` configuration'),
+            host = host,
+            options = {
+              source_filetype = 'python',
+            },
+          }
+        else
+          cb {
+            type = 'executable',
+            command = '/home/kevin/.virtualenvs/debugpy/bin/python',
+            -- command = 'home/kevin/.virtualenvs/debugpy/bin/python',
+            args = { '-m', 'debugpy.adapter' },
+            options = {
+              source_filetype = 'python',
+            },
+          }
+        end
+      end
+      dap.configurations.python = {
+        {
+          -- The first three options are required by nvim-dap
+          type = 'python', -- the type here established the link to the adapter definition: `dap.adapters.python`
+          request = 'launch',
+          name = 'Launch file',
+
+          -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
+
+          program = '${file}', -- This configuration will launch the current file if used.
+          pythonPath = function()
+            -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+            -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+            -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+            local cwd = vim.fn.getcwd()
+            if vim.fn.executable(cwd .. '/home/kevin/.virtualenvs/debugpy/bin/python') == 1 then
+              return cwd .. '/home/kevin/.virtualenvs/debugpy/bin/python'
+            elseif vim.fn.executable(cwd .. '/.venv/bin/python') == 1 then
+              return cwd .. '/.venv/bin/python'
+            else
+              return '/usr/bin/python3'
+            end
+          end,
+        },
+      }
+      -- dap.configurations.python = {
+      --   {
+      --     type = 'debugpy',
+      --     request = 'launch',
+      --     name = 'Launch file',
+      --     program = '${file}',
+      --     pythonPath = function()
+      --       return '/usr/bin/python3'
+      --     end,
+      --   },
+      -- }
+    end,
+  },
+
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
 
   -- "gc" to comment visual regions/lines
@@ -594,6 +689,7 @@ require('lazy').setup({
                 useLibraryCodeForTypes = true,
                 diagnosticMode = 'openFilesOnly',
                 somestufu = 'some',
+                typeCheckingMode = 'basic',
               },
             },
           },
