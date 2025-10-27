@@ -81,6 +81,7 @@ vim.opt.scrolloff = 10
 --  See `:help vim.keymap.set()`
 
 -- Personal keymaps
+vim.keymap.set('n', '<Leader>b', '<cmd>bp<CR>', { desc = 'Previous [b]uffer' })
 vim.keymap.set('n', '<C-a>', 'ggVG')
 vim.keymap.set('n', 'J', '20j')
 vim.keymap.set('n', 'K', '20k')
